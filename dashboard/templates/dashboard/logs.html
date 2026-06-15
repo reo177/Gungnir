@@ -1,0 +1,56 @@
+{% extends "dashboard_base.html" %}
+{% set active_page = "logs" %}
+{% block title %}ログ | SecurityBot{% endblock %}
+{% block dashboard_content %}
+<div class="page-header"><h1>📋 ログ</h1></div>
+{% if saved %}<div class="alert alert-success">✅ 設定を保存しました</div>{% endif %}
+
+<div class="card" style="margin-bottom:24px">
+  <h3 style="margin-bottom:16px">ログ設定</h3>
+  <form method="POST">
+    <div class="form-group">
+      <label class="form-label" for="channelId">ログチャンネルID</label>
+      <input type="text" id="channelId" name="channelId" class="form-input" placeholder="例: 123456789012345678" value="{{ settings.logs.channelId }}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">記録するイベント</label>
+      <div class="checkbox-group">
+        {% for ev in ['nuke','raid','verify','join','action'] %}
+          <label class="checkbox-label">
+            <input type="checkbox" name="events" value="{{ ev }}" {{ 'checked' if ev in settings.logs.events }}>
+            {{ ev|upper }}
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">保存する</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="section-header" style="margin-bottom:16px">
+    <h3>ログビューア</h3>
+    <form method="GET" style="display:flex;gap:8px;align-items:center">
+      <input type="date" name="date" value="{{ date }}" class="form-input" style="width:auto">
+      <button type="submit" class="btn btn-sm btn-outline">絞り込み</button>
+    </form>
+  </div>
+  {% if logs %}
+    <div class="log-list">
+      {% for log in logs %}
+        <div class="log-item log-{{ log.type }}">
+          <span class="log-badge log-badge-{{ log.type }}">{{ log.type|upper }}</span>
+          <div class="log-content">
+            <span class="log-title">{{ log.title }}</span>
+            <span class="log-desc">{{ log.description }}</span>
+            {% if log.user_tag %}<span class="log-user">👤 {{ log.user_tag }} ({{ log.user_id }})</span>{% endif %}
+          </div>
+          <span class="log-time">{{ log.timestamp }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state small"><p>{{ date }} のログはありません</p></div>
+  {% endif %}
+</div>
+{% endblock %}

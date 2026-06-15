@@ -1,0 +1,65 @@
+{% extends "dashboard_base.html" %}
+{% set active_page = "overview" %}
+{% block title %}{{ guild.name }} - 概要 | SecurityBot{% endblock %}
+{% block dashboard_content %}
+<div class="page-header"><h1>{{ guild.name }} の概要</h1></div>
+
+<div class="stats-grid">
+  <div class="stat-card stat-{{ 'green' if settings.antiNuke.enabled else 'red' }}">
+    <div class="stat-icon">💣</div><div class="stat-label">アンチヌーク</div>
+    <div class="stat-value">{{ '有効' if settings.antiNuke.enabled else '無効' }}</div>
+    <div class="stat-sub">しきい値: {{ settings.antiNuke.threshold }}回 / {{ settings.antiNuke.interval // 1000 }}秒</div>
+  </div>
+  <div class="stat-card stat-{{ 'green' if settings.antiRaid.enabled else 'red' }}">
+    <div class="stat-icon">🚨</div><div class="stat-label">アンチレイド</div>
+    <div class="stat-value">{{ '有効' if settings.antiRaid.enabled else '無効' }}</div>
+    <div class="stat-sub">しきい値: {{ settings.antiRaid.threshold }}人 / {{ settings.antiRaid.interval // 1000 }}秒</div>
+  </div>
+  <div class="stat-card stat-{{ 'green' if settings.verify.enabled else 'gray' }}">
+    <div class="stat-icon">✅</div><div class="stat-label">ロール認証</div>
+    <div class="stat-value">{{ '有効' if settings.verify.enabled else '無効' }}</div>
+    <div class="stat-sub">{{ 'ロール設定済み' if settings.verify.roleId else 'ロール未設定' }}</div>
+  </div>
+  <div class="stat-card stat-blue">
+    <div class="stat-icon">📋</div><div class="stat-label">ログチャンネル</div>
+    <div class="stat-value">{{ '設定済み' if settings.logs.channelId else '未設定' }}</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <h2>最近のアクティビティ</h2>
+    <a href="/dashboard/{{ guild_id }}/logs" class="btn btn-sm btn-outline">すべて見る</a>
+  </div>
+  {% if logs %}
+    <div class="log-list" id="recentLogs">
+      {% for log in logs %}
+        <div class="log-item log-{{ log.type }}">
+          <span class="log-badge log-badge-{{ log.type }}">{{ log.type|upper }}</span>
+          <span class="log-title">{{ log.title }}</span>
+          <span class="log-time">{{ log.timestamp }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state small"><p>まだログがありません</p></div>
+  {% endif %}
+</div>
+
+<script>
+setInterval(async () => {
+  const res  = await fetch('/api/logs/{{ guild_id }}?limit=10');
+  const data = await res.json();
+  if (!data.ok) return;
+  const c = document.getElementById('recentLogs');
+  if (!c) return;
+  c.innerHTML = data.logs.map(l =>
+    `<div class="log-item log-${l.type}">
+      <span class="log-badge log-badge-${l.type}">${l.type.toUpperCase()}</span>
+      <span class="log-title">${l.title}</span>
+      <span class="log-time">${l.timestamp}</span>
+    </div>`
+  ).join('');
+}, 30000);
+</script>
+{% endblock %}

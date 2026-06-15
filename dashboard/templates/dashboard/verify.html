@@ -1,0 +1,34 @@
+{% extends "dashboard_base.html" %}
+{% set active_page = "verify" %}
+{% block title %}ロール認証設定 | SecurityBot{% endblock %}
+{% block dashboard_content %}
+<div class="page-header"><h1>✅ ロール認証設定</h1><p>新規メンバーが認証ボタンを押すと自動でロールを付与します</p></div>
+{% if saved %}<div class="alert alert-success">✅ 設定を保存しました</div>{% endif %}
+<div class="card">
+  <form method="POST">
+    <div class="form-group">
+      <label class="toggle-label">
+        <span class="form-label">ロール認証を有効にする</span>
+        <label class="toggle"><input type="checkbox" name="enabled" {{ 'checked' if settings.verify.enabled }}><span class="toggle-slider"></span></label>
+      </label>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="roleId">付与するロールID<span class="form-hint">認証後に付与するロールのID</span></label>
+      <input type="text" id="roleId" name="roleId" class="form-input" placeholder="例: 123456789012345678" value="{{ settings.verify.roleId }}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="channelId">認証チャンネルID</label>
+      <input type="text" id="channelId" name="channelId" class="form-input" placeholder="例: 123456789012345678" value="{{ settings.verify.channelId }}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="message">認証パネルのメッセージ</label>
+      <textarea id="message" name="message" class="form-input form-textarea" maxlength="500">{{ settings.verify.message }}</textarea>
+    </div>
+    <div class="info-box">
+      <h4>📌 認証パネルの設置方法</h4>
+      <p>設定を保存後、Discordで <code>/verify-setup</code> コマンドを実行してください。</p>
+    </div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">保存する</button></div>
+  </form>
+</div>
+{% endblock %}

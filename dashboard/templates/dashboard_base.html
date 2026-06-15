@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-guild">
+      <img src="{{ guild.icon_url }}" alt="{{ guild.name }}" class="sidebar-guild-icon">
+      <span class="sidebar-guild-name">{{ guild.name }}</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/dashboard/{{ guild_id }}"             class="sidebar-link {% if active_page == 'overview'  %}active{% endif %}"><span class="sidebar-icon">🏠</span> 概要</a>
+      <a href="/dashboard/{{ guild_id }}/antinuke"    class="sidebar-link {% if active_page == 'antinuke'  %}active{% endif %}"><span class="sidebar-icon">💣</span> アンチヌーク</a>
+      <a href="/dashboard/{{ guild_id }}/antiraid"    class="sidebar-link {% if active_page == 'antiraid'  %}active{% endif %}"><span class="sidebar-icon">🚨</span> アンチレイド</a>
+      <a href="/dashboard/{{ guild_id }}/verify"      class="sidebar-link {% if active_page == 'verify'    %}active{% endif %}"><span class="sidebar-icon">✅</span> ロール認証</a>
+      <a href="/dashboard/{{ guild_id }}/logs"        class="sidebar-link {% if active_page == 'logs'      %}active{% endif %}"><span class="sidebar-icon">📋</span> ログ</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/dashboard" class="sidebar-link">← サーバー一覧</a>
+    </div>
+  </aside>
+  <main class="main-content">
+    {% block dashboard_content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

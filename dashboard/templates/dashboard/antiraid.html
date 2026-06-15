@@ -1,0 +1,28 @@
+{% extends "dashboard_base.html" %}
+{% set active_page = "antiraid" %}
+{% block title %}アンチレイド設定 | SecurityBot{% endblock %}
+{% block dashboard_content %}
+<div class="page-header"><h1>🚨 アンチレイド設定</h1><p>短時間の大量参加を検知してサーバーを守ります</p></div>
+{% if saved %}<div class="alert alert-success">✅ 設定を保存しました</div>{% endif %}
+<div class="card">
+  <form method="POST">
+    <div class="form-group">
+      <label class="toggle-label">
+        <span class="form-label">アンチレイドを有効にする</span>
+        <label class="toggle"><input type="checkbox" name="enabled" {{ 'checked' if settings.antiRaid.enabled }}><span class="toggle-slider"></span></label>
+      </label>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="threshold">しきい値（人数）<span class="form-hint">この人数を超えるとキックを実行</span></label>
+        <input type="number" id="threshold" name="threshold" class="form-input" min="2" max="50" value="{{ settings.antiRaid.threshold }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="interval">検知時間（ミリ秒）<span class="form-hint">この時間内にしきい値を超えたら発動</span></label>
+        <input type="number" id="interval" name="interval" class="form-input" min="1000" max="60000" step="1000" value="{{ settings.antiRaid.interval }}">
+      </div>
+    </div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">保存する</button></div>
+  </form>
+</div>
+{% endblock %}

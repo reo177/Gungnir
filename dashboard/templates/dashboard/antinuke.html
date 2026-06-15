@@ -1,0 +1,32 @@
+{% extends "dashboard_base.html" %}
+{% set active_page = "antinuke" %}
+{% block title %}アンチヌーク設定 | SecurityBot{% endblock %}
+{% block dashboard_content %}
+<div class="page-header"><h1>💣 アンチヌーク設定</h1><p>サーバーの大量破壊行為を検知して自動BANします</p></div>
+{% if saved %}<div class="alert alert-success">✅ 設定を保存しました</div>{% endif %}
+<div class="card">
+  <form method="POST">
+    <div class="form-group">
+      <label class="toggle-label">
+        <span class="form-label">アンチヌークを有効にする</span>
+        <label class="toggle"><input type="checkbox" name="enabled" {{ 'checked' if settings.antiNuke.enabled }}><span class="toggle-slider"></span></label>
+      </label>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="threshold">しきい値（回数）<span class="form-hint">この回数を超えるとBANを実行</span></label>
+        <input type="number" id="threshold" name="threshold" class="form-input" min="1" max="20" value="{{ settings.antiNuke.threshold }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="interval">検知時間（ミリ秒）<span class="form-hint">この時間内にしきい値を超えたら発動</span></label>
+        <input type="number" id="interval" name="interval" class="form-input" min="1000" max="60000" step="1000" value="{{ settings.antiNuke.interval }}">
+      </div>
+    </div>
+    <div class="info-box">
+      <h4>🛡️ 検知対象アクション</h4>
+      <ul><li>チャンネルの大量削除 / 作成</li><li>ロールの大量削除 / 作成</li><li>メンバーの大量BAN / キック</li><li>Webhookの大量作成</li></ul>
+    </div>
+    <div class="form-actions"><button type="submit" class="btn btn-primary">保存する</button></div>
+  </form>
+</div>
+{% endblock %}

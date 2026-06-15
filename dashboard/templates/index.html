@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}ホーム | SecurityBot{% endblock %}
+{% block content %}
+<div class="landing">
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">🛡️ SecurityBot</h1>
+      <p class="hero-subtitle">アンチヌーク・アンチレイド・ロール認証を<br>ブラウザから簡単に設定できるDiscord Botです</p>
+      <div class="hero-buttons">
+        {% if user %}
+          <a href="/dashboard" class="btn btn-primary btn-lg">ダッシュボードを開く</a>
+        {% else %}
+          <a href="/auth/login" class="btn btn-primary btn-lg">Discordでログイン</a>
+        {% endif %}
+        <a href="{{ invite_url }}" target="_blank" class="btn btn-outline btn-lg">ボットを招待する</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-row"><span class="badge badge-red">💣 NUKE</span> チャンネル3個削除 → 自動BAN</div>
+        <div class="hero-card-row"><span class="badge badge-orange">🚨 RAID</span> 5人が10秒以内に参加 → 全員キック</div>
+        <div class="hero-card-row"><span class="badge badge-green">✅ VERIFY</span> ボタン認証 → ロール自動付与</div>
+      </div>
+    </div>
+  </section>
+  <section class="features">
+    <div class="feature-card"><div class="feature-icon">💣</div><h3>アンチヌーク</h3><p>チャンネル/ロールの大量削除、BAN/KICKの乱用を検知して実行者を自動BAN</p></div>
+    <div class="feature-card"><div class="feature-icon">🚨</div><h3>アンチレイド</h3><p>短時間での大量参加を検知し、レイド参加者を即時キック</p></div>
+    <div class="feature-card"><div class="feature-icon">✅</div><h3>ロール認証</h3><p>ボタンパネルで1クリック認証。認証済みユーザーのみチャンネルアクセス可能に</p></div>
+    <div class="feature-card"><div class="feature-icon">📋</div><h3>詳細ログ</h3><p>全アクションをDiscordチャンネルとダッシュボードで確認。日付別に記録</p></div>
+  </section>
+</div>
+{% endblock %}
