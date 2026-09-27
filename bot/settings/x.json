@@ -1,0 +1,43 @@
+{
+  "antiNuke": {
+    "enabled": true,
+    "threshold": 3,
+    "interval": 5000
+  },
+  "antiRaid": {
+    "enabled": true,
+    "threshold": 5,
+    "interval": 10000
+  },
+  "verify": {
+    "enabled": false,
+    "roleId": "",
+    "channelId": "",
+    "message": "ボタンを押して認証してください。"
+  },
+  "logs": {
+    "channelId": "",
+    "events": [
+      "nuke",
+      "raid",
+      "verify",
+      "join",
+      "action"
+    ]
+  },
+  "whitelist": [
+    "123"
+  ],
+  "blacklist": [],
+  "punishments": {
+    "history": [
+      {
+        "user_id": "123",
+        "action": "kick",
+        "moderator_id": "456",
+        "reason": "test",
+        "timestamp": "2026-09-26T21:32:42.541272+00:00"
+      }
+    ]
+  }
+}
