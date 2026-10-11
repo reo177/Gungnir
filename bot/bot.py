@@ -466,6 +466,30 @@ async def _send_ctx_message(ctx: commands.Context, message: str = "", *, embed: 
         await ctx.send(content=message, embed=embed)
 
 
+async def _require_guild_permission(interaction: discord.Interaction, permission: str) -> bool:
+    """Enforce sensitive command permissions at runtime, including direct callback use."""
+    if interaction.guild is None:
+        await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
+        return False
+    if not getattr(interaction.user.guild_permissions, permission, False):
+        labels = {
+            "manage_guild": "サーバー管理",
+            "manage_roles": "ロール管理",
+            "moderate_members": "メンバーをタイムアウト",
+            "kick_members": "メンバーをキック",
+            "ban_members": "メンバーをBAN",
+            "manage_messages": "メッセージ管理",
+            "view_audit_log": "監査ログを表示",
+            "administrator": "管理者",
+        }
+        await interaction.response.send_message(
+            f"この操作には「{labels.get(permission, permission)}」権限が必要です。",
+            ephemeral=True,
+        )
+        return False
+    return True
+
+
 class CyberpunkHelpView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=180)
@@ -558,6 +582,9 @@ async def list_command(interaction: discord.Interaction, kind: str, action: str,
         await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
         return
 
+    if not await _require_guild_permission(interaction, "manage_guild"):
+        return
+
     kind = (kind or "whitelist").lower()
     if kind == "banlist":
         if action == "list":
@@ -602,6 +629,8 @@ async def allban_command(interaction: discord.Interaction):
     if interaction.guild is None:
         await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
         return
+    if not await _require_guild_permission(interaction, "ban_members"):
+        return
 
     guild_id = str(interaction.guild.id)
     target_ids = get_list(guild_id, "blacklist")
@@ -628,6 +657,8 @@ async def allban_command(interaction: discord.Interaction):
 async def log_command(interaction: discord.Interaction, scope: str = "all", limit: int = 5):
     if interaction.guild is None:
         await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
+        return
+    if not await _require_guild_permission(interaction, "view_audit_log"):
         return
 
     scope = (scope or "all").lower()
@@ -672,6 +703,8 @@ async def recent_abuse_command(interaction: discord.Interaction):
     if interaction.guild is None:
         await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
         return
+    if not await _require_guild_permission(interaction, "moderate_members"):
+        return
 
     entries = get_recent_abuse(str(interaction.guild.id), limit=5)
     if not entries:
@@ -693,6 +726,8 @@ async def user_check_command(interaction: discord.Interaction, user: discord.Mem
     if interaction.guild is None:
         await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
         return
+    if not await _require_guild_permission(interaction, "moderate_members"):
+        return
 
     history = get_punishment_history(str(interaction.guild.id), user.id, limit=10)
     if not history:
@@ -705,6 +740,8 @@ async def user_check_command(interaction: discord.Interaction, user: discord.Mem
 
 @client.tree.command(name="lockdown", description="緊急ロックダウン状態を実行します。")
 async def lockdown_command(interaction: discord.Interaction):
+    if not await _require_guild_permission(interaction, "administrator"):
+        return
     await interaction.response.send_message("緊急保護モードを有効化しました。", ephemeral=True)
 
 
@@ -713,6 +750,10 @@ async def lockdown_command(interaction: discord.Interaction):
 async def verify_setup_command(interaction: discord.Interaction, channel: discord.TextChannel | None = None, role: discord.Role | None = None, message: str = "ボタンを押して認証してください。"):
     if interaction.guild is None:
         await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
+        return
+    if not await _require_guild_permission(interaction, "manage_guild"):
+        return
+    if role is not None and not await _require_guild_permission(interaction, "manage_roles"):
         return
 
     target_channel = channel or (interaction.channel if isinstance(interaction.channel, discord.TextChannel) else None)
@@ -741,6 +782,8 @@ async def verify_setup_command(interaction: discord.Interaction, channel: discor
 async def verify_role_command(interaction: discord.Interaction, user: discord.Member | None = None):
     if interaction.guild is None:
         await interaction.response.send_message("このコマンドはサーバー内で実行してください。", ephemeral=True)
+        return
+    if not await _require_guild_permission(interaction, "manage_roles"):
         return
 
     settings = get_verify_settings(str(interaction.guild.id))
@@ -776,6 +819,18 @@ async def sanction_command(interaction: discord.Interaction, action: str, user: 
         return
 
     action = (action or "warn").lower()
+    needed_permission = {
+        "warn": "moderate_members",
+        "mute": "moderate_members",
+        "timeout": "moderate_members",
+        "kick": "kick_members",
+        "ban": "ban_members",
+    }.get(action)
+    if needed_permission is None:
+        await interaction.response.send_message(f"未対応の制裁です: {action}", ephemeral=True)
+        return
+    if not await _require_guild_permission(interaction, needed_permission):
+        return
     reason_text = reason or "理由なし"
 
     if action == "warn":
@@ -812,6 +867,8 @@ async def sanction_command(interaction: discord.Interaction, action: str, user: 
 @client.tree.command(name="purge", description="メッセージを一括削除します。")
 @app_commands.describe(limit="削除件数")
 async def purge_command(interaction: discord.Interaction, limit: int):
+    if not await _require_guild_permission(interaction, "manage_messages"):
+        return
     if limit <= 0:
         await interaction.response.send_message("1 以上の値を指定してください。", ephemeral=True)
         return
